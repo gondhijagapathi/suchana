@@ -1,6 +1,6 @@
-#include <dbus/dbus.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "dbus.h"
 
 void handle_notify(DBusMessage *msg) {
     DBusMessageIter args, array_iter, dict_iter;
@@ -206,9 +206,4 @@ void listen_dbus() {
         // Add a short sleep to avoid busy looping
         usleep(100000);
     }
-}
-
-int main() {
-    listen_dbus();
-    return 0;
 }
