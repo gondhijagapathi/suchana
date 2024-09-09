@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "dbus.h"
+#include "wayland.h"
 
 void handle_notify(DBusMessage *msg) {
     DBusMessageIter args, array_iter, dict_iter;
@@ -95,6 +96,7 @@ void handle_notify(DBusMessage *msg) {
     printf("  App Icon: %s\n", app_icon);
     printf("  Summary: %s\n", summary);
     printf("  Body: %s\n", body);
+    new_notification(summary);
 
     // Print actions (array of strings)
     printf("  Actions:\n");
