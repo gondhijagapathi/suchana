@@ -160,11 +160,6 @@ void create_layer_surface() {
         fprintf(stderr, "Compositor, shm, or layer shell not available. Exiting.\n");
     }
 
-    if (!compositor || !layer_shell) {
-        fprintf(stderr, "Compositor or layer shell is null. Exiting.\n");
-        exit(1);
-    }
-
     surface = wl_compositor_create_surface(compositor);
     if (!surface) {
         fprintf(stderr, "Failed to create surface\n");
@@ -179,6 +174,7 @@ void create_layer_surface() {
         exit(1);
     }
 
+    zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, NULL);
     zwlr_layer_surface_v1_set_size(layer_surface, WIDTH, HEIGHT);
     zwlr_layer_surface_v1_set_anchor(layer_surface, ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
                                                       ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
@@ -189,7 +185,6 @@ void create_layer_surface() {
 
 int new_notification(char* body) {
     create_layer_surface();  // Create the layer surface
-    zwlr_layer_surface_v1_add_listener(layer_surface, &layer_surface_listener, NULL);
 
     create_shm_buffer(WIDTH, HEIGHT, body);  // Create the buffer with contents
 
