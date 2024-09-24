@@ -4,8 +4,8 @@ CC = gcc
 SRC_DIR = src
 PROTOCOL_DIR = build/protocols
 PKGCONFIG = pkg-config
-DBUS_CFLAGS = $(shell $(PKGCONFIG) --cflags dbus-1 wayland-client cairo) -I$(SRC_DIR) -I$(PROTOCOL_DIR)
-DBUS_LIBS = $(shell $(PKGCONFIG) --libs dbus-1 wayland-client cairo)
+DBUS_CFLAGS = $(shell $(PKGCONFIG) --cflags dbus-1 wayland-client cairo libsystemd) -I$(SRC_DIR) -I$(PROTOCOL_DIR)
+DBUS_LIBS = $(shell $(PKGCONFIG) --libs dbus-1 wayland-client cairo libsystemd)
 
 # Define the source files and output binary
 BUILD_DIR = build
