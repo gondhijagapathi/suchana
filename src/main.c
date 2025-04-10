@@ -1,9 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <unistd.h>
 #include <systemd/sd-event.h>
+#include <sys/timerfd.h>
+#include <poll.h>
 #include "dbus.h"
 #include "wayland.h"
+#include "suchana_state.h"
+#include "notification.h"
+
+sd_event *event = NULL;
 
 // Callback function for processing bus events
 static int bus_callback(sd_event_source *source, int fd, uint32_t revents, void *userdata) {
@@ -44,10 +51,46 @@ static int wayland_callback(sd_event_source *source, int fd, uint32_t revents, v
     return 0;
 }
 
+int timer_callback(sd_event_source *source, int fd, uint32_t revents, void *userdata) {
+    uint32_t notification_id = (uint32_t)(uintptr_t)userdata;
+    uint64_t expirations;
+    
+    printf("Timer expired for notification ID: %u\n", notification_id);
+    
+    // Read the timer expiration
+    if (read(fd, &expirations, sizeof(expirations)) < 0) {
+        perror("Failed to read timer expiration");
+        return -1;
+    }
+    
+    // Check if the notification still exists before trying to remove it
+    int notification_exists = 0;
+    for (int i = 0; i < num_notifications; i++) {
+        if (notifications[i].id == notification_id && notifications[i].active) {
+            notification_exists = 1;
+            break;
+        }
+    }
+    
+    if (notification_exists) {
+        // Remove the notification
+        remove_notification(notification_id);
+    } else {
+        printf("Notification with ID %u already removed\n", notification_id);
+    }
+    
+    // Close the timer fd
+    close(fd);
+    
+    // Unreference the event source
+    sd_event_source_unref(source);
+    
+    return 0;
+}
+
 int main(int argc, char *argv[]) {
     sd_bus_slot *slot = NULL;
     sd_bus *bus = NULL;
-    sd_event *event = NULL;
     sd_event_source *wayland_event = NULL;
     int r;
 
@@ -65,7 +108,7 @@ int main(int argc, char *argv[]) {
         goto finish;
     }
 
-    // Attach the bus to the event loop (no need to manually add an I/O event)
+    // Attach the bus to the event loop
     r = sd_bus_attach_event(bus, event, 0);
     if (r < 0) {
         fprintf(stderr, "Failed to attach bus to event loop: %s\n", strerror(-r));

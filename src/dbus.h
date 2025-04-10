@@ -6,5 +6,7 @@
 
 int init_dbus(sd_bus **bus, sd_bus_slot **slot);
 static int method_get_server_information(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
+static int method_get_capabilities(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
+static int method_action_invoked(sd_bus_message *m, void *userdata, sd_bus_error *ret_error);
 
 #endif

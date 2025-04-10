@@ -41,9 +41,21 @@ build:
 generate_protocols:
 	$(PROTOCOL_GENERATE)
 
+# Install rules
+PREFIX = /usr/local
+BINDIR = $(PREFIX)/bin
+DBUSDIR = $(PREFIX)/share/dbus-1/services
+
+install: all
+	install -Dm755 $(OUT) $(DESTDIR)$(BINDIR)/suchana
+	install -Dm644 data/org.freedesktop.Notifications.service $(DESTDIR)$(DBUSDIR)/org.freedesktop.Notifications.service
+
+uninstall:
+	rm -f $(DESTDIR)$(BINDIR)/suchana
+	rm -f $(DESTDIR)$(DBUSDIR)/org.freedesktop.Notifications.service
+
 # Rule to clean up build files
 clean:
-	rm -f $(BUILD_DIR)/*.o $(OUT)
-	rm -f $(PROTOCOL_DIR)/*.c $(PROTOCOL_DIR)/*.h
+	rm -rf $(BUILD_DIR)
 
-.PHONY: all clean build generate_protocols
+.PHONY: all clean build generate_protocols install uninstall
